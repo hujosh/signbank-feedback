@@ -143,18 +143,7 @@ class MissingSignView(TestCase):
         response = missingsign(request) 
         self.assertEqual(response.status_code, 200)
                    
-     def test_missing_sign_view_redirects_after_successful_post_request(self):
-        '''
-        The missing sign view should redirect back to itself
-        after a successful post.
-        '''
-        request = self.factory.post(self.url, self.data)
-        setattr(request, 'session', 'session')
-        messages = FallbackStorage(request)
-        setattr(request, '_messages', messages)      
-        response = missingsign(request)
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, (self.url))
+     
 
    
         

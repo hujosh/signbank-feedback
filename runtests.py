@@ -23,6 +23,17 @@ try:
         ],
         SITE_ID=1,
         MIDDLEWARE_CLASSES=(),
+        
+        MIDDLEWARE = [
+            'django.middleware.security.SecurityMiddleware',
+            'django.contrib.sessions.middleware.SessionMiddleware',
+            'django.middleware.common.CommonMiddleware',
+            'django.middleware.csrf.CsrfViewMiddleware',
+            'django.contrib.auth.middleware.AuthenticationMiddleware',
+            'django.contrib.messages.middleware.MessageMiddleware',
+            'django.middleware.clickjacking.XFrameOptionsMiddleware',
+            ],
+        
         TEMPLATES = [
           {
           'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -49,6 +60,9 @@ try:
         LANGUAGE_NAME = "Auslan",
         COUNTRY_NAME = "Australia",
         SITE_TITLE = "Signbank",
+        
+        STATIC_URL = '/static/',
+
     )
 
     try:
