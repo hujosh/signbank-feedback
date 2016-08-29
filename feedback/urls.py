@@ -1,0 +1,83 @@
+# -*- coding: utf-8 -*-
+from django.conf.urls import url
+from django.views.generic import TemplateView
+
+from . import views
+
+urlpatterns = [
+    url(
+        regex="^SignFeedback/~create/$",
+        view=views.SignFeedbackCreateView.as_view(),
+        name='SignFeedback_create',
+    ),
+    url(
+        regex="^SignFeedback/(?P<pk>\d+)/~delete/$",
+        view=views.SignFeedbackDeleteView.as_view(),
+        name='SignFeedback_delete',
+    ),
+    url(
+        regex="^SignFeedback/(?P<pk>\d+)/$",
+        view=views.SignFeedbackDetailView.as_view(),
+        name='SignFeedback_detail',
+    ),
+    url(
+        regex="^SignFeedback/(?P<pk>\d+)/~update/$",
+        view=views.SignFeedbackUpdateView.as_view(),
+        name='SignFeedback_update',
+    ),
+    url(
+        regex="^SignFeedback/$",
+        view=views.SignFeedbackListView.as_view(),
+        name='SignFeedback_list',
+    ),
+	url(
+        regex="^MissingSignFeedback/~create/$",
+        view=views.MissingSignFeedbackCreateView.as_view(),
+        name='MissingSignFeedback_create',
+    ),
+    url(
+        regex="^MissingSignFeedback/(?P<pk>\d+)/~delete/$",
+        view=views.MissingSignFeedbackDeleteView.as_view(),
+        name='MissingSignFeedback_delete',
+    ),
+    url(
+        regex="^MissingSignFeedback/(?P<pk>\d+)/$",
+        view=views.MissingSignFeedbackDetailView.as_view(),
+        name='MissingSignFeedback_detail',
+    ),
+    url(
+        regex="^MissingSignFeedback/(?P<pk>\d+)/~update/$",
+        view=views.MissingSignFeedbackUpdateView.as_view(),
+        name='MissingSignFeedback_update',
+    ),
+    url(
+        regex="^MissingSignFeedback/$",
+        view=views.MissingSignFeedbackListView.as_view(),
+        name='MissingSignFeedback_list',
+    ),
+	url(
+        regex="^GeneralFeedback/~create/$",
+        view=views.GeneralFeedbackCreateView.as_view(),
+        name='GeneralFeedback_create',
+    ),
+    url(
+        regex="^GeneralFeedback/(?P<pk>\d+)/~delete/$",
+        view=views.GeneralFeedbackDeleteView.as_view(),
+        name='GeneralFeedback_delete',
+    ),
+    url(
+        regex="^GeneralFeedback/(?P<pk>\d+)/$",
+        view=views.GeneralFeedbackDetailView.as_view(),
+        name='GeneralFeedback_detail',
+    ),
+    url(
+        regex="^GeneralFeedback/(?P<pk>\d+)/~update/$",
+        view=views.GeneralFeedbackUpdateView.as_view(),
+        name='GeneralFeedback_update',
+    ),
+    url(
+        regex="^GeneralFeedback/$",
+        view=views.GeneralFeedbackListView.as_view(),
+        name='GeneralFeedback_list',
+    ),
+	]
