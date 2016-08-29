@@ -1,7 +1,7 @@
 from django_webtest import WebTest
 
 
-class MyTestCase(WebTest):
+class IndexPage(WebTest):
     def test_index_page_clicking_on_general_feedback(self):
         # The user goes to the index page...
         index = self.app.get('/')
@@ -55,6 +55,16 @@ class MyTestCase(WebTest):
             index.click('Report a Missing Sign', index = 2)
 
 
+class GenearlFeedbackPage(WebTest):
+    def test_submit_general_feedback(self):
+        # The user goes to the genereal feedback page...
+        general_feedback = self.app.get('/generalfeedback/')
+        self.assertTemplateUsed(general_feedback, 'feedback/generalfeedback_form.html')
+        # He sees one form
+        self.assertEqual(len(general_feedback.forms), 1)
+       
+        # He enters a comment
+        general_feedback.form['comment'] = 'this is a comment'
         
         
         
