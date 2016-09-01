@@ -106,7 +106,7 @@ class GeneralFeedbackView(TestCase):
         messages = FallbackStorage(request)
         setattr(request, '_messages', messages)
         response = GeneralFeedbackCreate.as_view()(request)
-        # Now let's make sure that the name and feedback are in the database                                                           
+        # Now let's make sure that the feedback is in the database                                                           
         feedback = GeneralFeedback.objects.all()
         # There should be one feedback in the datbase
         self.assertEqual(1, len(feedback))
