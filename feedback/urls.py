@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from . import views
+from feedback import views
 
 app_name = "feedback"
 urlpatterns = [  
@@ -17,9 +17,12 @@ urlpatterns = [
     # ex: missingsign/
     url(r'^missingsign/$', views.missingsign,
         name='missingsign'),
-    # ex: abscond-1/     
-    url(r'^sign/(?P<keyword>.+)-(?P<n>\d+)/$', views.signfeedback,
-        name = 'signfeedback'),         
+    # ex: sign/abscond-1/     
+    url(r'^word/(?P<keyword>.+)-(?P<n>\d+)/$', views.wordfeedback,
+        name = 'wordfeedback'),
+    # ex: gloss/1
+    url(r'^gloss/(?P<n>\d+)/$', views.glossfeedback,
+        name = 'glossfeedback')           
 ]   
 
 

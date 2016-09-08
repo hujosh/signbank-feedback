@@ -6,19 +6,19 @@ from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect
 from django.contrib import messages
 
-from .models import GeneralFeedback, MissingSignFeedback, SignFeedback
-from .forms import MissingSignFeedbackForm, SignFeedbackForm
+from feedback.models import GeneralFeedback, MissingSignFeedback, SignFeedback
+from feedback.forms import MissingSignFeedbackForm, SignFeedbackForm
 
 
 def index(request):
     return render(request, "feedback/index.html",
         {"language": settings.LANGUAGE_NAME,               
-         "country": settings.COUNTRY_NAME,})
+        "country": settings.COUNTRY_NAME,})
                     
                     
 class GeneralFeedbackCreate(SuccessMessageMixin, CreateView):
     '''
-    This class implements the general feedback form
+    This class implements the general feedback form.
     '''
     model = GeneralFeedback
     fields = ["comment", "video"]
@@ -57,13 +57,13 @@ def missingsign(request):
                 fb.movementtype = form.cleaned_data['movementtype']
                 fb.smallmovement = form.cleaned_data['smallmovement']
                 fb.repetition = form.cleaned_data['repetition']
+        
             
             # these last two are required either way (video or not)
             fb.meaning = form.cleaned_data['meaning']
             fb.comments = form.cleaned_data['comments']
-    
             fb.save()
-            posted = True
+           
             messages.success(request, "Thanks for your comment. We value your contribution.") 
             return HttpResponseRedirect(reverse('feedback:missingsign'))               
     else:
@@ -74,12 +74,25 @@ def missingsign(request):
                                 'language': settings.LANGUAGE_NAME,
                                 'country': settings.COUNTRY_NAME,
                                 'title':"Report a Missing Sign",
-                                'posted': posted,
                                 'form': form
                                 })
-                            
+                                
+                                                    
+def wordfeedback(request, keyword, n):
+    # This is a link to the word for which
+    # this feedback is associated with.
+    link = '%s-%s'%(keyword, n)
+    return record_signfeedback(request, link)
+    
+    
+def glossfeedback(request, gloss_number):
+    # This is a link to the gloss for which
+    # this feedback is associated with.
+    link = '%s'%(gloss_number)
+    return record_signfeedback(request, link)
+                    
 
-def signfeedback(request, keyword, n):
+def record_signfeedback(request, link):
     # POST request -- save the submitted feedback if it's valid
     if request.method == "POST":
         form = SignFeedbackForm(request.POST)
@@ -96,8 +109,8 @@ def signfeedback(request, keyword, n):
                 kwnotbelong=clean['kwnotbelong'],
                 comment=clean['comment'],
                 #user=request.user,
-                word = '%s-%s'%(keyword, n)
-                )
+                link = link)
+                
             saved_feedback.save()
             
             messages.success(request, "Thanks for your comment. We value your contribution.")
@@ -131,6 +144,7 @@ def delete(request, kind, id):
     Mark a feedback item as deleted, kind 'signfeedback', 
     'generalfeedback' or 'missingsign'.
     """
+
     if kind == 'sign':
         kind = SignFeedback
     elif kind == 'general':
@@ -141,6 +155,7 @@ def delete(request, kind, id):
         raise Http404    
     item = get_object_or_404(kind, id=id)
     # mark as deleted
+    print ('here')
     item.status = 'deleted'
     item.save()
     # return to referer

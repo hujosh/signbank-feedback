@@ -3,19 +3,10 @@ from django.db import models
 
 
 
-STATUS_CHOICES = ( ('unread', 'unread'),
+STATUS_CHOICES = (('unread', 'unread'),
                    ('read', 'read'),
                    ('deleted', 'deleted'),
                  )
-
-
-'''
-def t(message):
-    """Replace $country and $language in message with that from settings"""
-    
-    tpl = string.Template(message)
-    return tpl.substitute(country=settings.COUNTRY_NAME, language=settings.LANGUAGE_NAME)
-'''
 
 class GeneralFeedback(models.Model):
     '''
@@ -290,7 +281,7 @@ class SignFeedback(models.Model):
     
     # Let's get rid of this and see what happens... 
     #translation = models.ForeignKey(Translation, editable=False)
-    word = models.TextField()
+    link = models.TextField()
     
     comment = models.TextField("Please give us your comments about this sign. For example: do you think there are other keywords that belong with this sign? Please write your comments or new keyword/s below.", blank=True)
     kwnotbelong = models.TextField("Is there a keyword or keyword/s that DO NOT belong with this sign? Please provide the list of keywords below", blank=True)
@@ -301,6 +292,7 @@ class SignFeedback(models.Model):
     use = models.IntegerField("Do you use this sign?", choices=useChoices)
     suggested = models.IntegerField("If this sign is a suggested new sign, would you use it?", default=3, choices=suggestedChoices)
     correct = models.IntegerField("Is the information about the sign correct?", choices=correctChoices)
+    
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='unread')
     
     def __str__(self):
@@ -309,10 +301,4 @@ class SignFeedback(models.Model):
 
     class Meta:
         ordering = ['-date']
-
-
-
-
-
-   
     
