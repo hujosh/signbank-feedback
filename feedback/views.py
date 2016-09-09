@@ -155,7 +155,6 @@ def delete(request, kind, id):
         raise Http404    
     item = get_object_or_404(kind, id=id)
     # mark as deleted
-    print ('here')
     item.status = 'deleted'
     item.save()
     # return to referer

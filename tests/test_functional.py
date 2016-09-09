@@ -1,6 +1,6 @@
 import datetime
 from django_webtest import WebTest
-from feedback.models import GeneralFeedback
+from feedback.models import GeneralFeedback, MissingSignFeedback, SignFeedback
 
 
 class IndexPage(WebTest):
@@ -107,6 +107,58 @@ class GenearlFeedbackPage(WebTest):
         self.assertEqual(len(general_feedback.forms), 1)
         # He should see an error message indicating that the form was not submitted
         self.assertIn("This field is required", form_errors)
+        
+        
+class Delete(WebTest):
+    def test_delete_general_feedback(self):
+        # Set up the general feedback
+        comment = "If you can read this, it is correct"
+        feedback = GeneralFeedback(comment=comment)
+        feedback.save()
+        # The user goes to the show feedback page
+        show_feedback_page = self.app.get('/show/')
+        # The user presses the 'delete' button to delete the feedback
+        delete = show_feedback_page.form.submit('delete')
+        # The user should be redirected back to the show feedback page
+        self.assertIn('/show/', str(delete.follow))
+        show_feedback_page = delete.follow()
+        # The feedback should not be visible
+        self.assertNotIn(comment, show_feedback_page)
+        
+    def test_delete_missing_sign_feedback(self):
+        # Setup the missing sign feedback
+        comments = "If you can read this, it is correct"
+        meaning = "this too"
+        feedback = MissingSignFeedback(comments=comments, meaning=meaning)
+        feedback.save()
+        # The user goes to the show feedback page
+        show_feedback_page = self.app.get('/show/')
+        # The user presses the 'delete' button to delete the feedback
+        delete = show_feedback_page.form.submit('delete')
+        # The user should be redirected back to the show feedback page
+        self.assertIn('/show/', str(delete.follow))
+        show_feedback_page = delete.follow()
+        # The feedback should not be visible
+        self.assertNotIn(comments, show_feedback_page)
+        self.assertNotIn(meaning, show_feedback_page)
+ 
+    def test_delete_sign_feedback(self):
+        data = {"correct" : "1", "use" : "1", "like" : "1", 
+            "whereused" : "auswide", "isAuslan" : "1", "comment" : "i am here"}
+        feedback = SignFeedback(**data)
+        feedback.save()
+        # The user goes to the show feedback page
+        show_feedback_page = self.app.get('/show/')
+        # Let's make sure that the feedback is there...
+        self.assertIn(data['comment'], show_feedback_page)
+        # The user presses the 'delete' button to delete the feedback
+        delete = show_feedback_page.form.submit('delete')
+        # The user should be redirected back to the show feedback page
+        self.assertIn('/show/', str(delete.follow))
+        show_feedback_page = delete.follow()
+        # The feedback should not be visible   
+        self.assertNotIn(data['comment'], show_feedback_page)
+
         
         
         
