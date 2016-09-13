@@ -1,29 +1,36 @@
 import datetime
 from django_webtest import WebTest
 from feedback.models import GeneralFeedback, MissingSignFeedback, SignFeedback
+from django.contrib.auth.models import User
 
 
 class IndexPage(WebTest):
+    def setUp(self):
+        User.objects.create_user(
+            username='danu',
+            password='test123',
+        )
+  
     def test_index_page_clicking_on_general_feedback(self):
         # The user goes to the index page...
-        index = self.app.get('/')
+        index = self.app.get('/', user='danu')
         self.assertTemplateUsed(index, "feedback/index.html")
-
+    
         # He clicks on the 1st general feedback link
         genereal_feedback = index.click('General Feedback', index = 0)
         # He is taken to the general feedback form
-        self.assertTemplateUsed( genereal_feedback, "feedback/generalfeedback_form.html")
+        self.assertTemplateUsed(genereal_feedback, "feedback/generalfeedback_form.html")
         
         # The user goes back to the index page...
-        index = self.app.get('/')
+        index = self.app.get('/', user=self.user)
 
         # He clicks on the 2nd general feedback link
         genereal_feedback = index.click('General Feedback', index = 1)
         # He is taken to the general feedback form
-        self.assertTemplateUsed( genereal_feedback, "feedback/generalfeedback_form.html")
+        self.assertTemplateUsed(genereal_feedback, "feedback/generalfeedback_form.html")
 
         # The user goes back to the index page...
-        index = self.app.get('/')
+        index = self.app.get('/', user=self.user)
 
         # He tries to click on the 3rd general feedback link
         # ...There isn't one...

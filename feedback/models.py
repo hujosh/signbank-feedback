@@ -1,12 +1,13 @@
 from django.conf import settings 
 from django.db import models
-
+from django.contrib.auth.models import User
 
 
 STATUS_CHOICES = (('unread', 'unread'),
                    ('read', 'read'),
                    ('deleted', 'deleted'),
                  )
+
 
 class GeneralFeedback(models.Model):
     '''
@@ -21,7 +22,7 @@ class GeneralFeedback(models.Model):
     video = models.FileField(blank=True) # TODO -- COMMENT_VIDEO_LOCATION
     date = models.DateField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='unread')
-    # TODO -- a user field
+    user = models.ForeignKey(User)
 
 
 handformChoices = (
@@ -183,7 +184,7 @@ class MissingSignFeedback(models.Model):
     class Meta:
         ordering = ['-date']
      
-    # TODO -- a user field
+    user = models.ForeignKey(User)
     date = models.DateTimeField(auto_now_add=True)
     handform = models.IntegerField(choices=handformChoices, blank=True, default=0)
     handshape = models.IntegerField(choices=handshapeChoices, blank=True, default=0)
@@ -276,16 +277,12 @@ correctChoices =  ( (1, "yes"),
 class SignFeedback(models.Model):
     """Store feedback on a particular sign"""    
     # I'll put this in later...
-    #user = models.ForeignKey(authmodels.User, editable=False)
+    user = models.ForeignKey(User, editable=False)
     date = models.DateTimeField(auto_now_add=True)
-    
-    # Let's get rid of this and see what happens... 
     #translation = models.ForeignKey(Translation, editable=False)
     link = models.TextField()
-    
     comment = models.TextField("Please give us your comments about this sign. For example: do you think there are other keywords that belong with this sign? Please write your comments or new keyword/s below.", blank=True)
     kwnotbelong = models.TextField("Is there a keyword or keyword/s that DO NOT belong with this sign? Please provide the list of keywords below", blank=True)
-     
     isAuslan = models.IntegerField("Is this sign an %s language Sign?" %(settings.LANGUAGE_NAME), choices=isAuslanChoices)
     whereused = models.CharField("Where is this sign used?", max_length=10, choices=whereusedChoices)
     like = models.IntegerField("Do you like this sign?", choices=likedChoices)

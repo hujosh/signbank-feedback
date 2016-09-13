@@ -5,6 +5,8 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy, reverse 
 from django.http import HttpResponseRedirect
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from feedback.models import GeneralFeedback, MissingSignFeedback, SignFeedback
 from feedback.forms import MissingSignFeedbackForm, SignFeedbackForm
@@ -16,7 +18,7 @@ def index(request):
         "country": settings.COUNTRY_NAME,})
                     
                     
-class GeneralFeedbackCreate(SuccessMessageMixin, CreateView):
+class GeneralFeedbackCreate(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     '''
     This class implements the general feedback form.
     '''
@@ -25,15 +27,22 @@ class GeneralFeedbackCreate(SuccessMessageMixin, CreateView):
     success_url = reverse_lazy("feedback:generalfeedback")
     success_message = "Thanks for your comment. We value your contribution."
     
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super(GeneralFeedbackCreate, self).form_valid(form)
+
     
-# TODO -- Make this function better -- possibly by using CreateView      
+    
+# TODO -- Make this function better -- possibly by using CreateView
+@login_required      
 def missingsign(request):
     posted = False # was the feedback posted?
     
     if request.method == "POST":
         
         fb = MissingSignFeedback()
-
+        fb.user = request.user
+        print(request.user)
         form = MissingSignFeedbackForm(request.POST, request.FILES)
         
         if form.is_valid(): 
@@ -77,14 +86,14 @@ def missingsign(request):
                                 'form': form
                                 })
                                 
-                                                    
+@login_required                                                    
 def wordfeedback(request, keyword, n):
     # This is a link to the word for which
     # this feedback is associated with.
     link = '%s-%s'%(keyword, n)
     return record_signfeedback(request, link)
     
-    
+@login_required    
 def glossfeedback(request, gloss_number):
     # This is a link to the gloss for which
     # this feedback is associated with.
@@ -108,7 +117,7 @@ def record_signfeedback(request, link):
                 correct=clean['correct'],
                 kwnotbelong=clean['kwnotbelong'],
                 comment=clean['comment'],
-                #user=request.user,
+                user=request.user,
                 link = link)
                 
             saved_feedback.save()
@@ -125,6 +134,7 @@ def record_signfeedback(request, link):
     return render(request, "feedback/signfeedback_form.html", {"form": form})
 
 
+@permission_required('feedback.delete_generalfeedback')
 def showfeedback(request):
     """
     View to list the feedback that's been left on the site.
@@ -137,8 +147,9 @@ def showfeedback(request):
          'missing': missing,
          'signfb': signfb,
         })
+
         
-        
+@permission_required('feedback.delete_generalfeedback')
 def delete(request, kind, id):
     """
     Mark a feedback item as deleted, kind 'signfeedback', 
