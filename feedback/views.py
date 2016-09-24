@@ -42,7 +42,6 @@ def missingsign(request):
         
         fb = MissingSignFeedback()
         fb.user = request.user
-        print(request.user)
         form = MissingSignFeedbackForm(request.POST, request.FILES)
         
         if form.is_valid(): 

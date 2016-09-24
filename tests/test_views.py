@@ -344,6 +344,7 @@ class ShowFeedbackView(TestCase):
         feedback.save()
         request = create_request(self.url, 'get', permission=self.permission)
         response = showfeedback(request)
+        print (response.content)
         for field in data:
             # Let's not check for the presence of 
             # 'auswide' because it doesn't show

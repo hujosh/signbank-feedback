@@ -1,19 +1,19 @@
 import datetime
+
 from django_webtest import WebTest
 from feedback.models import GeneralFeedback, MissingSignFeedback, SignFeedback
 from django.contrib.auth.models import User
 
+from .test_views import create_user
 
 class IndexPage(WebTest):
     def setUp(self):
-        User.objects.create_user(
-            username='danu',
-            password='test123',
-        )
+         self.user = User.objects.create_user('foo', 'example@example.com', 
+            '123')
   
     def test_index_page_clicking_on_general_feedback(self):
         # The user goes to the index page...
-        index = self.app.get('/', user='danu')
+        index = self.app.get('/', user=self.user)
         self.assertTemplateUsed(index, "feedback/index.html")
     
         # He clicks on the 1st general feedback link
@@ -39,7 +39,7 @@ class IndexPage(WebTest):
 
     def test_index_page_clicking_on_missing_sign_feedback(self): 
         # The user goes to the index page...
-        index = self.app.get('/')
+        index = self.app.get('/', user=self.user)
         self.assertTemplateUsed(index, "feedback/index.html")
 
         # He clicks on the 1st missing sign link
@@ -70,14 +70,13 @@ class GenearlFeedbackPage(WebTest):
     
     def go_to_general_feedback_page(self):
          # The user goes to the genereal feedback page...
-        general_feedback = self.app.get('/generalfeedback/')
+        general_feedback = self.app.get('/generalfeedback/', user=self.user)
         self.assertTemplateUsed(general_feedback, 'feedback/generalfeedback_form.html')
         # He sees one form
         self.assertEqual(len(general_feedback.forms), 1)
         return general_feedback
                         
     def test_submit_general_feedback(self):
-        
         # The user goes to the general feedback page
         general_feedback = self.go_to_general_feedback_page()
         # He enters a comment
@@ -120,7 +119,8 @@ class Delete(WebTest):
     def test_delete_general_feedback(self):
         # Set up the general feedback
         comment = "If you can read this, it is correct"
-        feedback = GeneralFeedback(comment=comment)
+        feedback = GeneralFeedback(comment=comment, 
+            user=create_user())
         feedback.save()
         # The user goes to the show feedback page
         show_feedback_page = self.app.get('/show/')
@@ -136,7 +136,8 @@ class Delete(WebTest):
         # Setup the missing sign feedback
         comments = "If you can read this, it is correct"
         meaning = "this too"
-        feedback = MissingSignFeedback(comments=comments, meaning=meaning)
+        feedback = MissingSignFeedback(comments=comments, meaning=meaning,
+            user=create_user())
         feedback.save()
         # The user goes to the show feedback page
         show_feedback_page = self.app.get('/show/')
@@ -151,7 +152,8 @@ class Delete(WebTest):
  
     def test_delete_sign_feedback(self):
         data = {"correct" : "1", "use" : "1", "like" : "1", 
-            "whereused" : "auswide", "isAuslan" : "1", "comment" : "i am here"}
+            "whereused" : "auswide", "isAuslan" : "1", "comment" : "i am here",
+            "user" : create_user()}
         feedback = SignFeedback(**data)
         feedback.save()
         # The user goes to the show feedback page
@@ -165,10 +167,4 @@ class Delete(WebTest):
         show_feedback_page = delete.follow()
         # The feedback should not be visible   
         self.assertNotIn(data['comment'], show_feedback_page)
-
-        
-        
-        
-  
-        
 
