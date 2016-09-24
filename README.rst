@@ -7,6 +7,9 @@ Signbank-Feedback
 
 .. image:: https://travis-ci.org/hujosh/signbank-feedback.png?branch=master
     :target: https://travis-ci.org/hujosh/signbank-feedback
+    
+.. image:: https://codecov.io/gh/hujosh/signbank-feedback/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/hujosh/signbank-feedback
 
 The feedback component of Signbank
 
