@@ -1,33 +1,34 @@
 from django import forms
-
+from django.forms import ModelForm
 
 # TODO -- get rid of this * 
 from .models import *
 
-# TODO -- CONVERT THIS TO A MODEL FORM
+"""
 class MissingSignFeedbackForm(forms.Form):
-  
-    handform = forms.ChoiceField(choices=handformChoices,  required=False,
+
+    
+    handform = forms.TypedChoiceField(choices=handformChoices,  required=False,
         label='How many hands are used to make this sign?')
-    handshape = forms.ChoiceField(choices=handshapeChoices, required=False,
+    handshape = forms.TypedChoiceField(choices=handshapeChoices, required=False,
         label='What is the handshape?')
-    althandshape = forms.ChoiceField(choices=handshapeChoices, required=False, 
+    althandshape = forms.TypedChoiceField(choices=handshapeChoices, required=False, 
         label='What is the handshape of the left hand?')    
     location = forms.ChoiceField(choices=locationChoices, required=False,
         label='Choose the location of the sign on, or near the body')
-    relativelocation = forms.ChoiceField(choices=relativelocationChoices, 
+    relativelocation = forms.TypedChoiceField(choices=relativelocationChoices, 
         label='Choose the location of the right hand on, or near the left hand', required=False)
-    handbodycontact = forms.ChoiceField(choices=handbodycontactChoices, 
+    handbodycontact = forms.TypedChoiceField(choices=handbodycontactChoices, 
         label='Contact between hands and body', required=False)
-    handinteraction = forms.ChoiceField(choices=handinteractionChoices, 
+    handinteraction = forms.TypedChoiceField(choices=handinteractionChoices, 
         label='Interaction between hands', required=False)
-    direction = forms.ChoiceField(choices=directionChoices, 
+    direction = forms.TypedChoiceField(choices=directionChoices, 
         label='Movement direction of the hand(s)', required=False)
-    movementtype = forms.ChoiceField(choices=movementtypeChoices, 
+    movementtype = forms.TypedChoiceField(choices=movementtypeChoices, 
         label='Type of movement', required=False)
-    smallmovement = forms.ChoiceField(choices=smallmovementChoices, 
+    smallmovement = forms.TypedChoiceField(choices=smallmovementChoices, 
         label='Small movements of the hand(s) and fingers', required=False)
-    repetition = forms.ChoiceField(choices=repetitionChoices, 
+    repetition = forms.TypedChoiceField(choices=repetitionChoices, 
         label='Number of movements', required=False)
     
     meaning = forms.CharField(label='Sign Meaning', 
@@ -36,8 +37,17 @@ class MissingSignFeedbackForm(forms.Form):
         widget=forms.FileInput(attrs={'size':'60'}))
     comments = forms.CharField(label='Further Details', 
         widget=forms.Textarea(attrs={'cols':'55', 'rows':'8'}), required=False)
+    """
+ 
+class MissingSignFeedbackForm(ModelForm):
+    class Meta:
+        model = MissingSignFeedback
+        fields = ['handform', 'handshape', 'althandshape', 'location', 
+            'relativelocation', 'handbodycontact', 'handinteraction', 
+            'direction', 'movementtype', 'smallmovement', 'repetition',
+            'meaning', 'comments', 'video',]
         
-        
+            
 # TODO -- CONVERT THIS TO A MODEL FORM        
 class SignFeedbackForm(forms.Form):
     """Form for input of sign feedback"""

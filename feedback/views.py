@@ -3,7 +3,7 @@ from django.conf import settings
 from django.views.generic.edit import CreateView, FormView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.urls import reverse_lazy, reverse 
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseNotFound
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -31,59 +31,35 @@ class GeneralFeedbackCreate(LoginRequiredMixin, SuccessMessageMixin, CreateView)
         form.instance.user = self.request.user
         return super(GeneralFeedbackCreate, self).form_valid(form)
 
-    
-    
+
 # TODO -- Make this function better -- possibly by using CreateView
 @login_required      
 def missingsign(request):
-    posted = False # was the feedback posted?
-    
     if request.method == "POST":
-        
-        fb = MissingSignFeedback()
-        fb.user = request.user
         form = MissingSignFeedbackForm(request.POST, request.FILES)
-        
-        if form.is_valid(): 
-            
-            # either we get video of the new sign or we get the 
-            # description via the form
-            
-            if 'video' in form.cleaned_data and form.cleaned_data['video'] != None:
-                fb.video = form.cleaned_data['video']
-
-            else:
-                # get sign details from the form 
-                fb.handform = form.cleaned_data['handform'] 
-                fb.handshape = form.cleaned_data['handshape']
-                fb.althandshape = form.cleaned_data['althandshape']
-                fb.location = form.cleaned_data['location']
-                fb.relativelocation = form.cleaned_data['relativelocation']
-                fb.handbodycontact = form.cleaned_data['handbodycontact']
-                fb.handinteraction = form.cleaned_data['handinteraction']
-                fb.direction = form.cleaned_data['direction']
-                fb.movementtype = form.cleaned_data['movementtype']
-                fb.smallmovement = form.cleaned_data['smallmovement']
-                fb.repetition = form.cleaned_data['repetition']
-        
-            
-            # these last two are required either way (video or not)
-            fb.meaning = form.cleaned_data['meaning']
-            fb.comments = form.cleaned_data['comments']
-            fb.save()
-           
-            messages.success(request, "Thanks for your comment. We value your contribution.") 
-            return HttpResponseRedirect(reverse('feedback:missingsign'))               
+        if form.is_valid():
+            form_to_save = form.save(commit=False)
+            form_to_save.user = request.user
+            form_to_save.save()
+            success_message = '''
+                Thank you for your feedback. 
+                Note that addressing your feedback may take some time 
+                depending on the level of requests.'''
+            messages.success(request, success_message) 
+            return HttpResponseRedirect(reverse('feedback:missingsign'))  
+    # Any other kind of request goes here     
     else:
         form = MissingSignFeedbackForm()
-
+        
+    print (form.errors)
     return render(request, 'feedback/missingsign_form.html',
                                {
                                 'language': settings.LANGUAGE_NAME,
                                 'country': settings.COUNTRY_NAME,
                                 'title':"Report a Missing Sign",
                                 'form': form
-                                })
+                                })      
+            
                                 
 @login_required                                                    
 def wordfeedback(request, keyword, n):
@@ -91,6 +67,7 @@ def wordfeedback(request, keyword, n):
     # this feedback is associated with.
     link = '%s-%s'%(keyword, n)
     return record_signfeedback(request, link)
+    
     
 @login_required    
 def glossfeedback(request, gloss_number):
@@ -117,18 +94,14 @@ def record_signfeedback(request, link):
                 kwnotbelong=clean['kwnotbelong'],
                 comment=clean['comment'],
                 user=request.user,
-                link = link)
-                
+                link = link)  
             saved_feedback.save()
-            
             messages.success(request, "Thanks for your comment. We value your contribution.")
             return HttpResponseRedirect(reverse('feedback:signfeedback', 
-                kwargs={'keyword': keyword, 'n': n}))
-                           
+                kwargs={'keyword': keyword, 'n': n}))                    
    # Any other kind of request -- create the empty feedback form        
     else:
         form = SignFeedbackForm()
-   
     # Serve the empty feedback form to the user     
     return render(request, "feedback/signfeedback_form.html", {"form": form})
 
@@ -149,12 +122,11 @@ def showfeedback(request):
 
         
 @permission_required('feedback.delete_generalfeedback')
-def delete(request, kind, id):
+def delete(request, kind, feedback_id):
     """
-    Mark a feedback item as deleted, kind 'signfeedback', 
-    'generalfeedback' or 'missingsign'.
+    Mark a feedback item as deleted. kind can 
+    be either'sign', 'general' or 'missingsign'.
     """
-
     if kind == 'sign':
         kind = SignFeedback
     elif kind == 'general':
@@ -162,8 +134,8 @@ def delete(request, kind, id):
     elif kind == 'missingsign':
         kind = MissingSignFeedback
     else:
-        raise Http404    
-    item = get_object_or_404(kind, id=id)
+        return HttpResponseNotFound()
+    item = get_object_or_404(kind, pk=feedback_id)
     # mark as deleted
     item.status = 'deleted'
     item.save()

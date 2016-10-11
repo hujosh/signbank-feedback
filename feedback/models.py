@@ -26,6 +26,7 @@ class GeneralFeedback(models.Model):
 
 
 handformChoices = (
+                    (0, None),
                     (1, 'One handed'),
                     (2, 'Two handed (same shape for each hand)'),
                     (3, 'Two handed (diffent shapes for each hand)')

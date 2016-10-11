@@ -155,9 +155,9 @@ class MissingSignView(TestCase):
      def setUp(self):
         # the url is irrelevant when RequestFactory is used...
         self.url = '/missingsign/' 
-        self.data = {"meaning" : "10",
-                    "comments" : "10"}
-    
+        self.data = {"meaning" : "This is test data"}
+
+     """
      def test_missing_sign_view_renders_right_template(self):
         '''
         The missing sign view should render the 'feedback/missingsign_form.html'
@@ -175,7 +175,7 @@ class MissingSignView(TestCase):
         request = create_request(self.url, 'get')
         response = missingsign(request) 
         self.assertEqual(response.status_code, 200)
-        
+     """   
      def test_missing_sign_view_redirects_after_a_successful_post_request(self):
         '''
         The missign sign view should redirect back to itself after 
@@ -185,13 +185,12 @@ class MissingSignView(TestCase):
         response = missingsign(request)
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.url)
-        
+     
      def test_error_is_displayed_if_neither_comment_nor_meaning_is_submitted(self):
         '''
         Not submitting a comment should render an error on the form.
         '''
         request = create_request(self.url, 'post')
-      
         response = missingsign(request)
         self.assertContains(response, 'This field is required', count=2, status_code=200)    
         
@@ -213,7 +212,6 @@ class MissingSignView(TestCase):
         self.assertEqual(feedback[0].comment, self.data['comment'])
         # It should have a meaning
         self.assertEqual(feedback[0].meaning, self.data['meaning'])      
-        
         
 class WordFeedback(TestCase):
     def setUp(self):
@@ -317,7 +315,7 @@ class ShowFeedbackView(TestCase):
         request = create_request(self.url, 'get', permission=self.permission)
         response = showfeedback(request)
         self.assertContains(response, comment)
-        
+    
     def test_missing_sign_feedback_is_viewable(self):
         '''
         If there is missing sign feedback, it should be viewable.
@@ -344,13 +342,12 @@ class ShowFeedbackView(TestCase):
         feedback.save()
         request = create_request(self.url, 'get', permission=self.permission)
         response = showfeedback(request)
-        print (response.content)
         for field in data:
             # Let's not check for the presence of 
             # 'auswide' because it doesn't show
             if data[field] != 'auswide': 
                 self.assertContains(response, data[field])
-                
+               
                      
 class DeleteView(TestCase):
     def setUp(self):
@@ -414,3 +411,41 @@ class DeleteView(TestCase):
         # Check that it's gone
         deleted_feedback = SignFeedback.objects.get(pk=feedback.id)
         self.assertEqual('deleted', deleted_feedback.status)
+        
+    def test_delete_feedback_where_kind_doesnt_exist(self):
+        '''
+        If you try to delete feedback that doesn't exist,
+        404 should be returned.
+        '''
+        # This doesn't correspond to existing feedback
+        feedback_id = 1
+        # This is not a kind of sign
+        kind = 'does not exist'
+        request = create_request('irrelevant', 'get', permission=self.permission)
+        response = delete(request, kind, feedback_id)
+        self.assertEqual(response.status_code,404)
+        
+    def test_delete_feedback_where_feedback_doesnt_exist(self):
+        '''
+        If you try to delete feedback that doesn't exist,
+        404 should be returned.
+        '''
+        # This doesn't correspond to existing feedback
+        feedback_id = 1
+        # This is not a kind of sign
+        kind = 'sign'
+        request = create_request('irrelevant', 'get', permission=self.permission)
+        response = delete(request, kind, feedback_id)
+        self.assertEqual(response.status_code,404)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
