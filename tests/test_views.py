@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from django.test import TestCase, RequestFactory
 from django.conf import settings 
 from django.contrib.messages.storage.fallback import FallbackStorage
