@@ -1,10 +1,9 @@
-import datetime
-
 from django.test import TestCase, RequestFactory
 from django.conf import settings 
 from django.contrib.messages.storage.fallback import FallbackStorage
 from django.urls import reverse_lazy, reverse
 from django.contrib.auth.models import AnonymousUser, User, Permission
+from django.http import Http404
 
 from feedback.views import (index, missingsign, 
     GeneralFeedbackCreate, wordfeedback, showfeedback, delete)
@@ -39,10 +38,11 @@ def create_request(url, method, data=None, permission=None):
 def create_user(permission=None):
     users = User.objects.all()
     nusers = len(users)
-    # If the user has already been created...
+    # If a user doesn't exist already...
     if nusers != 1: 
         user = User.objects.create_user(
-            username='jacob', email='jacob@…', password='top_secret')
+            username='Jacob', email='jacob@…', password='top_secret', first_name = "Jacob",
+            last_name = "smith")
     else:
         # If the user has already been created, use it 
         user = users[0]
@@ -144,11 +144,10 @@ class GeneralFeedbackView(TestCase):
         feedback = GeneralFeedback.objects.all()
         # There should be one feedback in the datbase
         self.assertEqual(1, len(feedback))
-        # It should have a date 
-        self.assertIsInstance(feedback[0].date, datetime.date)
-        self.assertEqual(feedback[0].date, datetime.date.today())
         # It should have a comment
         self.assertEqual(feedback[0].comment, self.data['comment'])
+        # it should have a user
+        self.assertEqual(feedback[0].user, request.user)
 
         
 class MissingSignView(TestCase):
@@ -156,8 +155,7 @@ class MissingSignView(TestCase):
         # the url is irrelevant when RequestFactory is used...
         self.url = '/missingsign/' 
         self.data = {"meaning" : "This is test data"}
-
-     """
+  
      def test_missing_sign_view_renders_right_template(self):
         '''
         The missing sign view should render the 'feedback/missingsign_form.html'
@@ -175,7 +173,7 @@ class MissingSignView(TestCase):
         request = create_request(self.url, 'get')
         response = missingsign(request) 
         self.assertEqual(response.status_code, 200)
-     """   
+    
      def test_missing_sign_view_redirects_after_a_successful_post_request(self):
         '''
         The missign sign view should redirect back to itself after 
@@ -186,13 +184,18 @@ class MissingSignView(TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.url)
      
-     def test_error_is_displayed_if_neither_comment_nor_meaning_is_submitted(self):
+     def test_not_submitting_required_data(self):
         '''
-        Not submitting a comment should render an error on the form.
+        Omiting data from the meaning field should
+        not be successful. 
         '''
         request = create_request(self.url, 'post')
-        response = missingsign(request)
-        self.assertContains(response, 'This field is required', count=2, status_code=200)    
+        # It should re-render the form
+        with self.assertTemplateUsed('feedback/missingsign_form.html'):
+            response = missingsign(request)
+        # Should have a status code of 200  
+        self.assertEqual(response.status_code, 200)
+
         
      def test_missing_sign_view_saves_to_database(self):
         '''
@@ -205,20 +208,17 @@ class MissingSignView(TestCase):
         feedback = MissingSignFeedback.objects.all()
         # There should be one feedback in the datbase
         self.assertEqual(1, len(feedback))
-        # It should have a date 
-        self.assertIsInstance(feedback[0].date, datetime.date)
-        self.assertEqual(feedback[0].date, datetime.date.today())
-        # It should have a comment
-        self.assertEqual(feedback[0].comment, self.data['comment'])
         # It should have a meaning
-        self.assertEqual(feedback[0].meaning, self.data['meaning'])      
+        self.assertEqual(feedback[0].meaning, self.data['meaning'])
+        # It should have a user
+        self.assertEqual(feedback[0].user, request.user)
+        
         
 class WordFeedback(TestCase):
     def setUp(self):
         # the url is irrelevant when RequestFactory is used...
         self.url = '/word/liquid-1/' 
-        self.data = {"correct" : "1", "use" : "1", "like" : "1", 
-            "whereused" : "auswide", "isAuslan" : "1" }
+        self.data = {"comment" : "This is a test comment"}
         self.params = ['liquid', 1]
         
     def test_word_feedback_view_renders_right_template(self):
@@ -238,15 +238,18 @@ class WordFeedback(TestCase):
         request = create_request(self.url, 'get')
         response = wordfeedback(request, *self.params) 
         self.assertEqual(response.status_code, 200)          
-             
-    def test_error_is_displayed_if_none_of_the_required_fields_are_submitted(self):
+        
+    def test_submit_form_without_required_field(self):
         '''
-        Not submitting required fields should render an error on the form.
+        Not submitting required fields should 
+        re-render the form.
         '''
         request = create_request(self.url, 'post')
         response = wordfeedback(request, *self.params)
-        self.assertContains(response, 'This field is required', count=5, status_code=200)
-       
+        with self.assertTemplateUsed('feedback/signfeedback_form.html'):
+            response = wordfeedback(request, *self.params)
+        self.assertEqual(response.status_code, 200)
+    
     def test_word_feedback_view_redirects_after_successful_post_request(self):
         '''
         The word feedback view should redirect back to itself after
@@ -256,10 +259,11 @@ class WordFeedback(TestCase):
         response = wordfeedback(request, *self.params) 
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, self.url)   
-                 
+    
+          
     def test_word_feedback_view_saves_to_database(self):
         '''
-        Feedback should be saved to the database if 
+        Feedback about a word should be saved to the database if 
         it's valid.
         '''
         request = create_request(self.url, 'post',  self.data)
@@ -268,15 +272,13 @@ class WordFeedback(TestCase):
         feedback = SignFeedback.objects.all()
         # There should be one feedback in the datbase
         self.assertEqual(1, len(feedback))
-        # It should have a date 
-        self.assertIsInstance(feedback[0].date, datetime.date)
-        self.assertEqual(feedback[0].date, datetime.date.today())
-        self.assertEqual(feedback[0].correct, 1)
-        self.assertEqual(feedback[0].use, 1)
-        self.assertEqual(feedback[0].like, 1)
-        self.assertEqual(feedback[0].whereused, "auswide")
-        self.assertEqual(feedback[0].isAuslan, "1")
-        
+        self.assertEqual(feedback[0].comment, self.data['comment'])
+        # It should have a name
+        name = '%s-%s'%(self.params[0],self.params[1])
+        self.assertEqual(feedback[0].name, name)
+        # It should have a user
+        self.assertEqual(feedback[0].user, request.user)
+
         
 class ShowFeedbackView(TestCase):
     def setUp(self):
@@ -335,18 +337,14 @@ class ShowFeedbackView(TestCase):
         '''
         If there is sign feedback, it should be viewable
         '''
-        data = {"correct" : "1", "use" : "1", "like" : "1", 
-            "whereused" : "auswide", "isAuslan" : "1",
+        data = {"comment" : "This is a comment",
             "user" : create_user()}
         feedback = SignFeedback(**data)
         feedback.save()
         request = create_request(self.url, 'get', permission=self.permission)
         response = showfeedback(request)
         for field in data:
-            # Let's not check for the presence of 
-            # 'auswide' because it doesn't show
-            if data[field] != 'auswide': 
-                self.assertContains(response, data[field])
+            self.assertContains(response, data[field])
                
                      
 class DeleteView(TestCase):
@@ -401,8 +399,7 @@ class DeleteView(TestCase):
         '''
         Sign feedback should be deletable.
         '''
-        data = {"correct" : "1", "use" : "1", "like" : "1", 
-            "whereused" : "auswide", "isAuslan" : "1",
+        data = {"comment": "This is a comment",
             "user" : create_user(permission=self.permission)}
         feedback = SignFeedback(**data)
         feedback.save()
@@ -414,17 +411,19 @@ class DeleteView(TestCase):
         
     def test_delete_feedback_where_kind_doesnt_exist(self):
         '''
-        If you try to delete feedback that doesn't exist,
-        404 should be returned.
+        If you try to delete feedback of a kind that is not
+        one of 'sign', 'general' or 'missingsign', 505 should
+        be returned...
         '''
         # This doesn't correspond to existing feedback
         feedback_id = 1
         # This is not a kind of sign
         kind = 'does not exist'
         request = create_request('irrelevant', 'get', permission=self.permission)
-        response = delete(request, kind, feedback_id)
-        self.assertEqual(response.status_code,404)
-        
+        # Now, these don't return 505 but rather an exception. 
+        # The real app will return 505 however. 
+        self.assertRaises(ValueError, delete, request, kind, feedback_id)
+
     def test_delete_feedback_where_feedback_doesnt_exist(self):
         '''
         If you try to delete feedback that doesn't exist,
@@ -432,20 +431,9 @@ class DeleteView(TestCase):
         '''
         # This doesn't correspond to existing feedback
         feedback_id = 1
-        # This is not a kind of sign
         kind = 'sign'
         request = create_request('irrelevant', 'get', permission=self.permission)
-        response = delete(request, kind, feedback_id)
-        self.assertEqual(response.status_code,404)
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+        self.assertRaises(Http404, delete, request, kind, feedback_id)
+      
     
     

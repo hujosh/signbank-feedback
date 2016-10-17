@@ -1,8 +1,8 @@
 from django import forms
-from django.forms import ModelForm
+from django.forms import ModelForm, RadioSelect
 
-# TODO -- get rid of this * 
-from .models import *
+from feedback.models import MissingSignFeedback, SignFeedback
+
 
 """
 class MissingSignFeedbackForm(forms.Form):
@@ -48,10 +48,9 @@ class MissingSignFeedbackForm(ModelForm):
             'meaning', 'comments', 'video',]
         
             
-# TODO -- CONVERT THIS TO A MODEL FORM        
-class SignFeedbackForm(forms.Form):
+class SignFeedbackForm(ModelForm):
     """Form for input of sign feedback"""
-  
+    """
     isAuslan = forms.ChoiceField(choices=isAuslanChoices, initial=0, widget=forms.RadioSelect)
     #isAuslan = forms.IntegerField(initial=0, widget=forms.HiddenInput)
     whereused = forms.ChoiceField(choices=whereusedChoices, initial="n/a")
@@ -66,9 +65,16 @@ class SignFeedbackForm(forms.Form):
     #correct = forms.IntegerField(initial=0, widget=forms.HiddenInput)
     kwnotbelong = forms.CharField(label="List keywords", required=False, widget=forms.Textarea) 
     comment = forms.CharField(required=False, widget=forms.Textarea)
-
-
-
+    """
+    class Meta:
+        model = SignFeedback
+        fields = ['isAuslan', 'whereused', 'like', 'use', 
+            'suggested', 'correct', 'kwnotbelong', 
+            'comment',] 
+        # By default, Django uses a 'select' for a model field with a choice argument. 
+        # We can override this behaviour by setting a 'radio select' for each field that needs it. 
+        widgets = {field:RadioSelect for field in 
+            ['isAuslan', 'like', 'use', 'suggested', 'correct']}
 
 
 

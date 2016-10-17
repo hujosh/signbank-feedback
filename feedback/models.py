@@ -226,7 +226,7 @@ if settings.LANGUAGE_NAME == "BSL":
                         ('Newcastle', 'Newcastle'),
                         ('Other', 'Other (note in comments)'),
                         ("Don't Know", "Don't Know"),
-                        ('N/A', 'N/A'),
+                        ('n/a', 'N/A'),
                         )
 else:
     whereusedChoices = (('auswide', 'Australia Wide'),
@@ -277,25 +277,22 @@ correctChoices =  ( (1, "yes"),
                     
 class SignFeedback(models.Model):
     """Store feedback on a particular sign"""    
-    # I'll put this in later...
     user = models.ForeignKey(User, editable=False)
     date = models.DateTimeField(auto_now_add=True)
-    #translation = models.ForeignKey(Translation, editable=False)
-    link = models.TextField()
-    comment = models.TextField("Please give us your comments about this sign. For example: do you think there are other keywords that belong with this sign? Please write your comments or new keyword/s below.", blank=True)
+    # This is the name of the sign or gloss that the feedback is about...
+    name = models.TextField()
+    comment = models.TextField("Please give us your comments about this sign. For example: do you think there are other keywords that belong with this sign? Please write your comments or new keyword/s below.")
     kwnotbelong = models.TextField("Is there a keyword or keyword/s that DO NOT belong with this sign? Please provide the list of keywords below", blank=True)
-    isAuslan = models.IntegerField("Is this sign an %s language Sign?" %(settings.LANGUAGE_NAME), choices=isAuslanChoices)
-    whereused = models.CharField("Where is this sign used?", max_length=10, choices=whereusedChoices)
-    like = models.IntegerField("Do you like this sign?", choices=likedChoices)
-    use = models.IntegerField("Do you use this sign?", choices=useChoices)
-    suggested = models.IntegerField("If this sign is a suggested new sign, would you use it?", default=3, choices=suggestedChoices)
-    correct = models.IntegerField("Is the information about the sign correct?", choices=correctChoices)
-    
+    isAuslan = models.IntegerField("Is this sign an %s language Sign?" %(settings.LANGUAGE_NAME), choices=isAuslanChoices, default=0, blank=True )
+    whereused = models.CharField("Where is this sign used?", max_length=10, choices=whereusedChoices, default='n/a', blank=True)
+    like = models.IntegerField("Do you like this sign?", choices=likedChoices, default=0, blank=True)
+    use = models.IntegerField("Do you use this sign?", choices=useChoices, default=0, blank=True)
+    suggested = models.IntegerField("If this sign is a suggested new sign, would you use it?", default=3, choices=suggestedChoices, blank=True)
+    correct = models.IntegerField("Is the information about the sign correct?", choices=correctChoices, default=0, blank=True)    
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='unread')
     
     def __str__(self):
-        #return str(self.translation.translation) + " by " + str(self.user) + " on " + str(self.date) # when we've got users, we'll do this.
-        return str(self.translation.translation) + " on " + str(self.date)
+        return str(self.name) + " by " + str(self.user) + " on " + str(self.date)
 
     class Meta:
         ordering = ['-date']
