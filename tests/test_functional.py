@@ -1,11 +1,12 @@
+# -*- coding: utf-8 -*-
 import datetime
-
 
 from django.contrib.auth.models import User
 from django_webtest import WebTest
 
 from .test_views import create_user
 from feedback.models import GeneralFeedback, MissingSignFeedback, SignFeedback
+
 
 class IndexPage(WebTest):
     def setUp(self):
