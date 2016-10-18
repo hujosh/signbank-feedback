@@ -35,6 +35,8 @@ You must define the following variables in ``sttings.py``
 * ``LANGUAGE_NAME``
 * ``COUNTRY_NAME`` 
 * ``SITE_TITLE``
+
+You must also add ``bootstrap3`` and ``feedback`` to your ``INSTALLED_APPS`` variable.
     
 Features
 --------
