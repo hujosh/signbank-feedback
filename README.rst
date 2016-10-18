@@ -30,7 +30,7 @@ Then use it in a project::
     import feedback
     
     
-You must define the following variables in ``sttings.py``
+You must define the following variables in ``settings.py``
 
 * ``LANGUAGE_NAME``
 * ``COUNTRY_NAME`` 
