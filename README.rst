@@ -28,7 +28,14 @@ Install Signbank-Feedback::
 Then use it in a project::
 
     import feedback
+    
+    
+You must define the following variables in ``sttings.py``
 
+* ``LANGUAGE_NAME``
+* ``COUNTRY_NAME`` 
+* ``SITE_TITLE``
+    
 Features
 --------
 
