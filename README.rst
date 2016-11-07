@@ -32,9 +32,9 @@ Then use it in a project::
     
 You must define the following variables in ``settings.py``:
 
-* LANGUAGE_NAME = "Auslan"
-* COUNTRY_NAME = "Australia"
-* SITE_TITLE = "Signbank"
+* ``LANGUAGE_NAME = "Auslan"``
+* ``COUNTRY_NAME = "Australia"``
+* ``SITE_TITLE = "Signbank"``
 
 That's for the Auslan site. For BSL, or another sign language, 
 you would use different values for those three variables.
