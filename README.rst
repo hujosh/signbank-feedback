@@ -30,11 +30,14 @@ Then use it in a project::
     import feedback
     
     
-You must define the following variables in ``settings.py``
+You must define the following variables in ``settings.py``:
 
-* ``LANGUAGE_NAME``
-* ``COUNTRY_NAME`` 
-* ``SITE_TITLE``
+* LANGUAGE_NAME = "Auslan"
+* COUNTRY_NAME = "Australia"
+* SITE_TITLE = "Signbank"
+
+That's for the Auslan site. For BSL, or another sign language, 
+you would use different values for those three variables.
 
 You must also add ``bootstrap3`` and ``feedback`` to your ``INSTALLED_APPS`` variable.
     
