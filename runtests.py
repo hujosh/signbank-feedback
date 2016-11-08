@@ -1,5 +1,7 @@
 import sys
+import os
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 try:
     from django.conf import settings
@@ -36,12 +38,13 @@ try:
            
             ],
         
-        TEMPLATES = [
+       TEMPLATES = [
           {
           'BACKEND': 'django.template.backends.django.DjangoTemplates',
-                  'DIRS': [
+                  'DIRS': [os.path.join((os.path.dirname(os.path.abspath(__file__))),
+                            'tests', 'templates'),
             # insert your TEMPLATE_DIRS here
-            ],
+],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
