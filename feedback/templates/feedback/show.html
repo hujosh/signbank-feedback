@@ -1,6 +1,42 @@
 {% extends "baselayout.html" %}
 
 {% load static %}
+{% block extrahead %}
+    <script type="text/javascript" src="{% static "feedback/js/jquery-1.11.0.min.js" %}"></script>
+    <link href="//vjs.zencdn.net/4.5/video-js.css" rel="stylesheet">
+    <script src="//vjs.zencdn.net/4.5/video.js"></script>
+{% endblock %}
+{% block extrajs %}
+<script type='text/javascript'>
+/* reveal a comment, possibly including a video */
+togglecomment = function() {
+  if ($(this).hasClass('showing')) {
+    $(this).next('.commentbody').hide();
+    $(this).removeClass('showing');
+    $(this).find('.indicator').removeClass('ui-icon-minus').addClass('ui-icon-plus');
+  } else {
+    $(this).next('.commentbody').show();
+    $(this).addClass('showing');
+    $(this).find('.indicator').removeClass('ui-icon-plus').addClass('ui-icon-minus');
+  }
+};
+
+jQuery(document).ready(function(){
+ 
+    $('.commenthead').click(togglecomment);
+	
+	$('.commentbody').hide();
+ 
+	$('.delete').confirm({
+	    msg:'Delete this comment?',
+	    timeout:3000
+	});	
+ 
+});
+</script>
+{% endblock %}
+
+
 
 {% block content %}
   <h3>General Feedback</h3>
@@ -53,7 +89,12 @@
           </h4> 
         </div>
         <div id="signcollapse{{fb.id}}" class="panel-collapse collapse">
-       {% comment %}  <p><strong>Sign:</strong> <a href="{% url 'root_page' %}dictionary/gloss/{{fb.translation.gloss.idgloss}}.html">{{fb.translation.gloss.idgloss}}</a></p>{% endcomment %} 
+        {% if fb.kind == "word" %}
+            <p><strong>Sign:</strong> <a href="/dictionary/words/{{fb.name}}">{{fb.name}}</a></p>
+        {% endif %}
+        {% if fb.kind == "gloss" %}
+            <p><strong>Sign:</strong> <a href="/dictionary/gloss/{{fb.name}}">{{fb.name}}</a></p>
+        {% endif %}
         <p><strong>Comment:</strong> {{fb.comment}}</p>
         <p><strong>Don't Belong:</strong> {{fb.kwnotbelong}}</p>
         <!--
@@ -129,37 +170,6 @@
   {% endfor %} 
 {% endblock %} 
 
-{% block javascript %}
-{{ block.super }}
-<link href="//vjs.zencdn.net/4.5/video-js.css" rel="stylesheet">
-<script src="//vjs.zencdn.net/4.5/video.js"></script>
-<script type='text/javascript'>
-/* reveal a comment, possibly including a video */
-togglecomment = function() {
-  if ($(this).hasClass('showing')) {
-    $(this).next('.commentbody').hide();
-    $(this).removeClass('showing');
-    $(this).find('.indicator').removeClass('ui-icon-minus').addClass('ui-icon-plus');
-  } else {
-    $(this).next('.commentbody').show();
-    $(this).addClass('showing');
-    $(this).find('.indicator').removeClass('ui-icon-plus').addClass('ui-icon-minus');
-  }
-};
-
-jQuery(document).ready(function(){
- 
-    $('.commenthead').click(togglecomment);
-	
-	$('.commentbody').hide();
- 
-	$('.delete').confirm({
-	    msg:'Delete this comment?',
-	    timeout:3000
-	});	
-});
-</script>
-{% endblock %}
 
 
 

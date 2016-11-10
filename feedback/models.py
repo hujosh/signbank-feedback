@@ -281,6 +281,8 @@ class SignFeedback(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     # This is the name of the sign or gloss that the feedback is about...
     name = models.TextField()
+    # the kind can be either 'gloss' or, 'word'.
+    kind = models.TextField()
     comment = models.TextField("Please give us your comments about this sign. For example: do you think there are other keywords that belong with this sign? Please write your comments or new keyword/s below.")
     kwnotbelong = models.TextField("Is there a keyword or keyword/s that DO NOT belong with this sign? Please provide the list of keywords below", blank=True)
     isAuslan = models.IntegerField("Is this sign an %s language Sign?" %(settings.LANGUAGE_NAME), choices=isAuslanChoices, default=0, blank=True )

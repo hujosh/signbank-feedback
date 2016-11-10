@@ -80,7 +80,7 @@ def glossfeedback(request, gloss_number):
             save_signfeedback(request, form, name)
             messages.success(request, 'Thank you for your comment. We value your contribution') 
             return HttpResponseRedirect(reverse('feedback:glossfeedback', 
-                kwargs={'gloss_number': gloss_numbe}))                    
+                kwargs={'gloss_number': gloss_number}))                    
    # Any other kind of request goes here
     else:
         form = SignFeedbackForm()
@@ -107,8 +107,10 @@ def showfeedback(request):
     return render(request, "feedback/show.html",
         {'general': general,
          'missing': missing,
-         'signfb': signfb,
-        })
+         'signfb': signfb
+        }
+    )
+        
 
         
 @permission_required('feedback.delete_generalfeedback')
